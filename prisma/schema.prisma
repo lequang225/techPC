@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id         String    @id @default(cuid())
+  name       String
+  slug       String    @unique
+  shortDesc  String?
+  longDesc   String?
+  price      Int
+  oldPrice   Int?
+  stock      Int       @default(0)
+  isActive   Boolean   @default(true)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+  images     Image[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([categoryId])
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  isMain    Boolean  @default(false)
+  order     Int      @default(0)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Setting {
+  id              String   @id @default("global")
+  bannerTitle     String   @default("Build PC mơ ước của bạn")
+  bannerSubtitle  String   @default("Cấu hình cao cấp — Bảo hành 36 tháng — Giao hàng 2h toàn quốc.")
+  bannerImages    String[]
+  bannerButton    String   @default("Xem sản phẩm →")
+  footerAddress   String   @default("Địa chỉ: 123 Nguyễn Trãi, TP.HCM")
+  footerPhone     String   @default("Hotline: 1900 1234")
+  footerEmail     String   @default("Email: contact@techpc.vn")
+}
